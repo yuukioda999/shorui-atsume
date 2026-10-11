@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>書類あつめ β版モニター募集</title>
+<meta name="description" content="顧問先ごとの提出ページと自動リマインドで、毎月の資料回収と催促をまるごと仕組みに。小規模税理士事務所向け「書類あつめ」のβ版モニターを先着10事務所で募集しています。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="書類あつめ β版モニター募集｜税理士事務所の資料回収を自動化">
+<meta property="og:description" content="顧問先はスマホで撮って送るだけ。未提出の顧問先にだけ自動で催促が届きます。β期間中は無料。">
+<meta property="og:image" content="https://example.com/ogp.png"><!-- PLACEHOLDER: OGP画像 -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1F5B47">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "書類あつめ",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "小規模税理士事務所向けの顧客資料回収・自動リマインドサービス",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY", "description": "β版モニター期間中は無料" },
+  "author": { "@type": "Person", "name": "小田裕貴" }
+}
+</script>
+<style>
+/* Layout: 帳簿のような罫線と余白。左に主張、右に「提出状況表」という実物を置く。 */
+:root{
+  --paper:#F3F5F2; --surface:#FFFFFF; --ink:#17201C; --muted:#56625C; --line:#D6DDD8;
+  --green:#1F5B47; --green-ink:#FFFFFF; --green-soft:#E2EDE7;
+  --red:#A63A2B; --red-soft:#F6E4E0; --amber:#8A5C0E; --amber-soft:#F5EBD6;
+  --f-display:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --s1:.5rem; --s2:1rem; --s3:1.5rem; --s4:2.5rem; --s5:4rem; --s6:6rem;
+  --r:10px; --wrap:1120px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#121815; --surface:#1A221E; --ink:#E6ECE8; --muted:#A3B0A9; --line:#2E3A34;
+  --green:#5FB592; --green-ink:#0E1512; --green-soft:#1F3229;
+  --red:#E58A7A; --red-soft:#3A221E; --amber:#E2B45E; --amber-soft:#382C17; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#121815; --surface:#1A221E; --ink:#E6ECE8; --muted:#A3B0A9; --line:#2E3A34;
+  --green:#5FB592; --green-ink:#0E1512; --green-soft:#1F3229;
+  --red:#E58A7A; --red-soft:#3A221E; --amber:#E2B45E; --amber-soft:#382C17; color-scheme:dark }
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.8;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+a{color:var(--green)}
+:focus-visible{outline:3px solid var(--green);outline-offset:3px;border-radius:4px}
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
+h1,h2,h3{font-family:var(--f-display);line-height:1.35;text-wrap:balance;word-break:auto-phrase;margin:0;font-weight:700}
+h2{font-size:clamp(1.6rem,3.4vw,2.25rem)}
+h3{font-size:1.2rem}
+p{margin:0}
+.eyebrow{font-size:.8rem;letter-spacing:.12em;color:var(--green);font-weight:700}
+.lead{color:var(--muted);max-width:38em}
+section{padding-block:var(--s6)}
+.sec-head{display:grid;gap:var(--s2);margin-bottom:var(--s4)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);min-height:60px}
+.logo{display:flex;align-items:center;gap:.6rem;font-family:var(--f-display);font-weight:700;font-size:1.15rem;color:var(--ink);text-decoration:none}
+.logo svg{flex:none}
+.badge-beta{font-family:var(--f-mono);font-size:.7rem;border:1px solid var(--green);color:var(--green);padding:.05rem .4rem;border-radius:4px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.75rem 1.4rem;border-radius:999px;font-weight:700;font-size:1rem;text-decoration:none;border:2px solid var(--green);transition:transform .15s,background .15s;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--green);color:var(--green-ink)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--green)}
+.btn-sm{min-height:44px;padding:.5rem 1rem;font-size:.9rem}
+
+/* hero */
+.hero{padding-block:var(--s5) var(--s6)}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:var(--s5);align-items:center}
+.hero-copy{display:grid;gap:var(--s3);min-width:0}
+.hero h1{font-size:clamp(1.7rem,4.2vw,3rem);letter-spacing:.01em}
+.nw{display:inline-block;white-space:nowrap}
+.hero h1 .mark{background:linear-gradient(transparent 62%,var(--green-soft) 62%)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+.hero-note{font-size:.85rem;color:var(--muted)}
+.facts{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;font-size:.9rem;color:var(--muted);list-style:none;padding:0;margin:0}
+.facts li::before{content:"✓ ";color:var(--green);font-weight:700}
+
+/* ledger mock */
+.ledger{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 18px 40px -24px rgba(16,40,30,.35);overflow:hidden;min-width:0}
+.ledger-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s2);padding:var(--s2) var(--s3);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ledger-head strong{font-family:var(--f-display);font-size:1.05rem}
+.ledger-head span{font-size:.75rem;color:var(--muted)}
+.ledger-sum{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.ledger-sum div{padding:.75rem var(--s3);border-right:1px solid var(--line)}
+.ledger-sum div:last-child{border-right:0}
+.ledger-sum b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-variant-numeric:tabular-nums;line-height:1.2}
+.ledger-sum small{color:var(--muted);font-size:.75rem}
+.ledger-table{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{text-align:left;padding:.65rem .9rem;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.75rem}
+tr:last-child td{border-bottom:0}
+@media (min-width:901px){td:nth-child(2){white-space:normal}}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:.1rem .55rem;border-radius:999px}
+.p-ok{background:var(--green-soft);color:var(--green)}
+.p-wait{background:var(--red-soft);color:var(--red)}
+.p-sent{background:var(--amber-soft);color:var(--amber)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.ledger-foot{padding:.6rem var(--s3);font-size:.72rem;color:var(--muted);border-top:1px solid var(--line);background:color-mix(in srgb,var(--paper) 50%,var(--surface))}
+
+/* pain */
+.pain{background:var(--surface);border-block:1px solid var(--line)}
+.pain-list{list-style:none;margin:0;padding:0;display:grid;border-top:1px solid var(--line)}
+.pain-list li{display:grid;grid-template-columns:7rem 1fr;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.pain-list .when{font-family:var(--f-mono);font-size:.85rem;color:var(--red);padding-top:.2rem}
+.pain-list h3{margin-bottom:.35rem}
+.pain-list p{color:var(--muted)}
+
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3);counter-reset:step}
+.steps li{position:relative;padding-top:var(--s4);display:grid;gap:.5rem;align-content:start;min-width:0}
+.steps li::before{counter-increment:step;content:counter(step);position:absolute;top:0;left:0;width:2rem;height:2rem;border-radius:50%;background:var(--green);color:var(--green-ink);display:grid;place-items:center;font-family:var(--f-mono);font-size:.9rem}
+.steps li::after{content:"";position:absolute;top:1rem;left:2.6rem;right:-.9rem;border-top:1px dashed var(--line)}
+.steps li:last-child::after{display:none}
+.steps p{color:var(--muted)}
+.steps .who{font-size:.75rem;font-weight:700;color:var(--green);letter-spacing:.06em}
+
+/* client side */
+.client-grid{display:grid;grid-template-columns:auto 1fr;gap:var(--s5);align-items:center}
+.phone{width:260px;max-width:100%;border:10px solid var(--ink);border-radius:32px;background:var(--surface);padding:var(--s3) var(--s2);display:grid;gap:.75rem;font-size:.85rem}
+.phone .ph-title{font-weight:700;font-size:.95rem}
+.phone .ph-sub{color:var(--muted);font-size:.75rem}
+.ph-item{display:flex;justify-content:space-between;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem}
+.ph-item.done{background:var(--green-soft);border-color:transparent}
+.ph-btn{background:var(--green);color:var(--green-ink);border-radius:8px;text-align:center;padding:.65rem;font-weight:700}
+.checks{list-style:none;padding:0;margin:var(--s3) 0 0;display:grid;gap:var(--s2)}
+.checks li{display:grid;grid-template-columns:1.5rem 1fr;gap:.5rem}
+.checks li::before{content:"";width:1.1rem;height:1.1rem;margin-top:.35rem;border-radius:4px;background:var(--green-soft);box-shadow:inset 0 0 0 2px var(--green)}
+.checks b{display:block}
+.checks span{color:var(--muted);font-size:.92rem}
+
+/* beta */
+.beta-box{background:var(--green);color:var(--green-ink);border-radius:16px;padding:clamp(1.5rem,4vw,3rem);display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.beta-box h2{color:inherit}
+.beta-box .eyebrow{color:inherit;opacity:.8}
+.beta-terms{display:grid;gap:0;margin:0}
+.beta-terms div{display:grid;grid-template-columns:7.5rem 1fr;gap:var(--s2);padding:.8rem 0;border-bottom:1px solid color-mix(in srgb,var(--green-ink) 25%,transparent)}
+.beta-terms dt{font-size:.85rem;opacity:.8}
+.beta-terms dd{margin:0;font-weight:700}
+.beta-ask{display:grid;gap:var(--s2);align-content:start}
+.beta-ask p{opacity:.9}
+.beta-box .btn{background:var(--green-ink);color:var(--green);border-color:var(--green-ink);justify-self:start}
+
+/* faq */
+.faq{display:grid;border-top:1px solid var(--line);max-width:820px}
+details{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;padding:var(--s3) 2.5rem var(--s3) 0;position:relative;font-weight:700}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:.25rem;top:50%;transform:translateY(-50%);font-family:var(--f-mono);font-size:1.3rem;color:var(--green)}
+details[open] summary::after{content:"−"}
+details p{padding-bottom:var(--s3);color:var(--muted);max-width:44em}
+
+/* form */
+.apply{background:var(--surface);border-top:1px solid var(--line)}
+.apply-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:var(--s5);align-items:start}
+form{display:grid;gap:var(--s3);min-width:0}
+.field{display:grid;gap:.4rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+label{font-weight:700;font-size:.92rem}
+.req{font-size:.7rem;color:var(--red);margin-left:.4rem;font-weight:700}
+.opt{font-size:.7rem;color:var(--muted);margin-left:.4rem}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:.75rem .9rem;min-height:48px;width:100%}
+textarea{min-height:7rem;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
+.err{color:var(--red);font-size:.8rem;min-height:1em}
+.consent{font-size:.82rem;color:var(--muted)}
+.result{border:1px solid var(--line);border-radius:var(--r);padding:var(--s3);display:grid;gap:var(--s2);background:var(--green-soft)}
+.result textarea{background:var(--surface);font-size:.85rem}
+.result-actions{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+
+footer{padding-block:var(--s4) calc(var(--s5) + env(safe-area-inset-bottom,0px));font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+footer .wrap{display:grid;gap:.5rem}
+
+/* sticky mobile CTA */
+.mcta{display:none}
+
+@media (max-width:900px){
+  .hero-grid,.client-grid,.apply-grid,.beta-box{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .steps li{padding-top:0;padding-left:3rem}
+  .steps li::after{display:none}
+  .phone{justify-self:center}
+  section{padding-block:var(--s5)}
+}
+@media (max-width:600px){
+  body{font-size:15.5px}
+  .top .btn{display:none}
+  .pain-list li{grid-template-columns:1fr;gap:.25rem}
+  .row2{grid-template-columns:1fr}
+  .ledger-sum div{padding:.6rem .8rem}
+  th,td{padding:.6rem .8rem}
+  .ledger-head{padding:.8rem}
+  .beta-terms div{grid-template-columns:6rem 1fr}
+  .mcta{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:.6rem 16px calc(.6rem + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);transition:transform .2s}
+  .mcta .btn{width:100%}
+  .mcta.hide{transform:translateY(110%)}
+  footer{padding-bottom:calc(6rem + env(safe-area-inset-bottom,0px))}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="書類あつめ トップへ">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="5" width="18" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 4h13a3 3 0 0 1 3 3v15" fill="none" stroke="var(--green)" stroke-width="2"/><path d="M8 13l3 3 6-6" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      書類あつめ <span class="badge-beta">β</span>
+    </a>
+    <a class="btn btn-primary btn-sm" href="#apply">モニターに応募する</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">小規模税理士事務所向け ／ β版モニター募集中</p>
+        <h1><span class="nw">「資料まだですか」の</span><span class="nw">連絡を、</span><br><span class="mark nw">もう毎月しなくていい。</span></h1>
+        <p class="lead">顧問先ごとの提出ページを作るだけ。顧問先はスマホで撮って送り、未提出の顧問先にだけ自動で催促が届きます。誰が何を出していないかは、一覧で一目でわかります。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#apply">β版モニターに応募する（無料）</a>
+          <a class="btn btn-ghost" href="#how">仕組みを見る</a>
+        </div>
+        <ul class="facts">
+          <li>先着10事務所</li>
+          <li>β期間中は無料</li>
+          <li>会計ソフトはそのまま</li>
+        </ul>
+      </div>
+
+      <figure class="ledger" aria-label="提出状況の画面イメージ" style="margin:0">
+        <div class="ledger-head"><strong>10月分 資料の提出状況</strong><span>締切 11/5 ・ サンプル表示</span></div>
+        <div class="ledger-sum">
+          <div><b style="color:var(--green)">18</b><small>提出済み</small></div>
+          <div><b style="color:var(--amber)">4</b><small>催促送信済み</small></div>
+          <div><b style="color:var(--red)">2</b><small>未提出</small></div>
+        </div>
+        <div class="ledger-table">
+          <table>
+            <thead><tr><th scope="col">顧問先</th><th scope="col">書類</th><th scope="col">状態</th><th scope="col">次の催促</th></tr></thead>
+            <tbody>
+              <tr><td>株式会社サンプル商事</td><td>通帳コピー・領収書</td><td><span class="pill p-ok">提出済み</span></td><td class="mono">—</td></tr>
+              <tr><td>○○デザイン事務所</td><td>売上請求書</td><td><span class="pill p-sent">催促済み</span></td><td class="mono">11/03</td></tr>
+              <tr><td>△△整骨院</td><td>領収書・カード明細</td><td><span class="pill p-wait">未提出</span></td><td class="mono">11/01</td></tr>
+              <tr><td>合同会社サンプル</td><td>通帳コピー</td><td><span class="pill p-ok">提出済み</span></td><td class="mono">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figcaption class="ledger-foot">事務所側の管理画面イメージ（開発中のため変わる場合があります）</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="pain" aria-labelledby="pain-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">毎月くり返している作業</p>
+        <h2 id="pain-h">記帳の前に、資料を集めるところで止まっていませんか。</h2>
+      </div>
+      <ul class="pain-list">
+        <li><span class="when">月初</span><div><h3>顧問先ごとに「今月の資料をお願いします」と連絡</h3><p>メール、LINE、電話。相手ごとに連絡手段が違い、送った・送っていないの管理も手作業です。</p></div></li>
+        <li><span class="when">締切前</span><div><h3>出していない顧問先を探して、もう一度催促</h3><p>Excelの一覧と受信メールを見比べて確認。催促しにくい相手ほど後回しになります。</p></div></li>
+        <li><span class="when">届いた後</span><div><h3>メール、LINE、郵送にばらけた資料を整理</h3><p>写真がLINEで届き、紙は郵送で届く。保存先を探すだけで時間が消えていきます。</p></div></li>
+        <li><span class="when">11〜12月</span><div><h3>年末調整の資料回収で、さらに連絡が増える</h3><p>保険料控除証明書や扶養控除等申告書など、顧問先の従業員分まで集める時期は催促も倍になります。</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">仕組み</p>
+        <h2 id="how-h">やることは最初の登録だけ。あとは毎月勝手に回ります。</h2>
+      </div>
+      <ol class="steps">
+        <li><span class="who">事務所</span><h3>顧問先と必要書類を登録</h3><p>顧問先名と「通帳コピー」「領収書」など毎月の書類、締切日を登録します。顧問先ごとに専用の提出URLができます。</p></li>
+        <li><span class="who">顧問先</span><h3>スマホで撮って送る</h3><p>届いたURLを開いて、書類を撮影して送るだけ。ログインやアプリのインストールは要りません。</p></li>
+        <li><span class="who">自動</span><h3>未提出の顧問先にだけ催促</h3><p>締切の数日前と当日に、まだ出していない顧問先にだけメールでリマインドを送ります。届いた資料は顧問先ごと・月ごとに整理されます。</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="client-h" style="padding-top:0">
+    <div class="wrap client-grid">
+      <div class="phone" aria-label="顧問先側の提出画面イメージ" role="img">
+        <div><div class="ph-title">10月分の資料提出</div><div class="ph-sub">○○税理士事務所 ・ 締切 11/5</div></div>
+        <div class="ph-item done"><span>通帳コピー</span><span class="pill p-ok">提出済み</span></div>
+        <div class="ph-item"><span>領収書</span><span class="pill p-wait">未提出</span></div>
+        <div class="ph-item"><span>カード明細</span><span class="pill p-wait">未提出</span></div>
+        <div class="ph-btn">撮影してアップロード</div>
+      </div>
+      <div style="min-width:0">
+        <div class="sec-head" style="margin-bottom:0">
+          <p class="eyebrow">顧問先側の使い方</p>
+          <h2 id="client-h">ITが苦手な顧問先でも、迷わず出せる画面にしています。</h2>
+        </div>
+        <ul class="checks">
+          <li><div><b>ログインもアプリも不要</b><span>URLを開けばすぐ提出画面。パスワードを忘れて止まることがありません。</span></div></li>
+          <li><div><b>今月出すものが一目でわかる</b><span>提出済みと未提出が色で分かれるので、出し忘れに顧問先自身が気づけます。</span></div></li>
+          <li><div><b>会計ソフトはこれまでどおり</b><span>freeeやマネーフォワード、弥生などを使っていても併用できます。資料を集める部分だけを担当します。</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="beta-h" style="padding-top:0">
+    <div class="wrap">
+      <div class="beta-box">
+        <div style="display:grid;gap:var(--s3);align-content:start">
+          <p class="eyebrow">β版モニターの条件</p>
+          <h2 id="beta-h">一緒に作っていただける事務所を、先着10件で募集しています。</h2>
+          <dl class="beta-terms">
+            <div><dt>募集数</dt><dd>先着10事務所</dd></div>
+            <div><dt>利用料</dt><dd>β期間中は無料</dd></div>
+            <div><dt>β期間</dt><dd>2026年11月〜2027年1月（予定）</dd></div>
+            <div><dt>正式版</dt><dd>月額1,980円〜（予定）。モニター参加事務所は優待価格でご案内します</dd></div>
+            <div><dt>対象</dt><dd>顧問先が10〜100件ほどの税理士事務所</dd></div>
+          </dl>
+        </div>
+        <div class="beta-ask">
+          <h3>お願いしたいこと</h3>
+          <p>実際の顧問先数件で使っていただき、月1回・15分ほどのオンラインで使い心地を教えてください。いただいたご意見をもとに、毎月機能を改善していきます。</p>
+          <p>年末調整の資料回収に間に合うよう、11月から順次ご案内します。</p>
+          <a class="btn" href="#apply">応募フォームへ</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="faq-h" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head"><p class="eyebrow">よくある質問</p><h2 id="faq-h">よくある質問</h2></div>
+      <div class="faq">
+        <details><summary>顧問先にアカウントを作ってもらう必要はありますか？</summary><p>ありません。顧問先ごとの専用URLを開くだけで提出できます。URLは顧問先ごとに推測されにくい文字列で発行します。</p></details>
+        <details><summary>freeeやマネーフォワードの資料提出機能と何が違いますか？</summary><p>会計ソフトの種類に関係なく使える点と、未提出の顧問先への催促を自動化する点に絞っています。顧問先が会計ソフトを使っていなくても問題ありません。</p></details>
+        <details><summary>預かった資料の保管はどうなっていますか？</summary><p>通信は暗号化し、資料は国内のサーバーに保管する予定です。事務所ごとにデータを分けて管理し、β期間終了時には全データを削除するかエクスポートするかを選べます。</p></details>
+        <details><summary>β期間が終わったら自動で有料になりますか？</summary><p>なりません。正式版の内容と価格をご案内したうえで、続けるかどうかを選んでいただけます。続けない場合に費用は一切かかりません。</p></details>
+        <details><summary>誰が開発・運営していますか？</summary><p>フリーランスのWebエンジニア、小田裕貴が個人で開発・運営しています。ご要望に小回りよく対応できるのが個人開発の強みです。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="apply" id="apply" aria-labelledby="apply-h">
+    <div class="wrap apply-grid">
+      <div class="sec-head">
+        <p class="eyebrow">応募フォーム</p>
+        <h2 id="apply-h">β版モニターに応募する</h2>
+        <p class="lead">入力は1分ほどです。2営業日以内に、ご利用開始のご案内をメールでお送りします。応募しても利用の義務は生じません。</p>
+      </div>
+
+      <form id="applyForm" novalidate>
+        <div class="row2">
+          <div class="field"><label for="office">事務所名<span class="req">必須</span></label><input id="office" name="office" autocomplete="organization" required><span class="err" id="office-err"></span></div>
+          <div class="field"><label for="name">お名前<span class="req">必須</span></label><input id="name" name="name" autocomplete="name" required><span class="err" id="name-err"></span></div>
+        </div>
+        <div class="field"><label for="email">メールアドレス<span class="req">必須</span></label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" required><span class="err" id="email-err"></span></div>
+        <div class="row2">
+          <div class="field"><label for="clients">顧問先の数<span class="req">必須</span></label>
+            <select id="clients" name="clients" required>
+              <option value="">選択してください</option><option>〜10件</option><option>11〜30件</option><option>31〜60件</option><option>61〜100件</option><option>101件以上</option>
+            </select><span class="err" id="clients-err"></span></div>
+          <div class="field"><label for="method">今の資料回収の方法<span class="opt">任意</span></label>
+            <select id="method" name="method">
+              <option value="">選択してください</option><option>メール</option><option>LINE</option><option>郵送・持参</option><option>会計ソフトの機能</option><option>クラウドストレージ</option><option>複数の方法が混在</option>
+            </select></div>
+        </div>
+        <div class="field"><label for="pain">資料回収で一番困っていること<span class="opt">任意</span></label><textarea id="pain" name="pain" placeholder="例：締切を過ぎても出さない顧問先への催促が負担"></textarea></div>
+        <p class="consent">ご入力いただいた情報は、β版のご案内とヒアリングのご連絡にのみ使用します。</p>
+        <button class="btn btn-primary" type="submit" id="submitBtn">この内容で応募する</button>
+        <div class="result" id="result" hidden role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><strong style="color:var(--ink)">書類あつめ</strong>（β版）</div>
+    <div>運営：小田裕貴（個人開発） ／ お問い合わせ：<span class="mono">yuuki.oda.work@gmail.com</span></div>
+    <div>© 2026 書類あつめ</div>
+  </div>
+</footer>
+
+<div class="mcta" id="mcta"><a class="btn btn-primary" href="#apply">β版モニターに応募する（無料）</a></div>
+
+<script>
+/* 応募の送信先。Googleフォームの formResponse URL と各項目の entry ID を入れると、そのまま送信されます。
+   未設定の間は、応募内容とメールアドレスを表示してコピーしてもらう方式で動きます。 */
+const FORM_CONFIG = {
+  action: "", // PLACEHOLDER: 例 "https://docs.google.com/forms/d/e/XXXX/formResponse"
+  entries: { office:"entry.1", name:"entry.2", email:"entry.3", clients:"entry.4", method:"entry.5", pain:"entry.6" } // PLACEHOLDER
+};
+const CONTACT = "yuuki.oda.work@gmail.com";
+
+const form = document.getElementById('applyForm');
+const result = document.getElementById('result');
+const btn = document.getElementById('submitBtn');
+const msgs = { office:"事務所名を入力してください", name:"お名前を入力してください", email:"メールアドレスを正しく入力してください（例：info@example.jp）", clients:"顧問先の数を選択してください" };
+
+function validate(){
+  let ok = true, first = null;
+  for (const id of Object.keys(msgs)){
+    const el = document.getElementById(id), err = document.getElementById(id+'-err');
+    const v = el.value.trim();
+    const bad = !v || (id==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    err.textContent = bad ? msgs[id] : "";
+    el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+    if (bad){ ok = false; first = first || el; }
+  }
+  if (first) first.focus();
+  return ok;
+}
+function data(){ const d={}; for (const k of Object.keys(FORM_CONFIG.entries)) d[k]=document.getElementById(k).value.trim(); return d; }
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+  const d = data();
+  btn.disabled = true; btn.textContent = "送信しています…";
+  if (FORM_CONFIG.action){
+    try{
+      const fd = new FormData();
+      for (const [k,v] of Object.entries(d)) fd.append(FORM_CONFIG.entries[k], v);
+      await fetch(FORM_CONFIG.action, { method:"POST", mode:"no-cors", body:fd });
+      result.innerHTML = "<strong>応募を受け付けました。</strong><p>2営業日以内に、ご入力のメールアドレス宛にご案内をお送りします。</p>";
+      result.hidden = false; form.querySelectorAll('input,select,textarea').forEach(el=>el.disabled=true);
+      btn.hidden = true; return;
+    }catch(err){ /* 下の手動送信に切り替える */ }
+  }
+  const text = `【書類あつめ β版モニター応募】\n事務所名：${d.office}\nお名前：${d.name}\nメール：${d.email}\n顧問先の数：${d.clients}\n資料回収の方法：${d.method||'-'}\n困っていること：${d.pain||'-'}`;
+  result.innerHTML = `<strong>あと一歩で応募完了です。</strong><p>下の内容を <span class="mono">${CONTACT}</span> 宛にメールでお送りください。</p><textarea id="mailText" readonly aria-label="応募内容"></textarea><div class="result-actions"><button type="button" class="btn btn-primary btn-sm" id="copyBtn">内容をコピー</button><a class="btn btn-ghost btn-sm" id="mailLink">メールアプリで開く</a></div>`;
+  result.querySelector('#mailText').value = text;
+  result.querySelector('#mailLink').href = `mailto:${CONTACT}?subject=${encodeURIComponent('書類あつめ β版モニター応募')}&body=${encodeURIComponent(text)}`;
+  result.querySelector('#copyBtn').addEventListener('click', async (ev) => {
+    const ta = result.querySelector('#mailText');
+    try{ await navigator.clipboard.writeText(ta.value); ev.target.textContent = "コピーしました"; }
+    catch(_){ ta.focus(); ta.select(); ev.target.textContent = "選択しました。コピーしてください"; }
+  });
+  result.hidden = false; btn.disabled = false; btn.textContent = "この内容で応募する";
+});
+
+/* スマホ固定CTA：ファーストビューと応募フォームが見えている間は隠す */
+const mcta = document.getElementById('mcta');
+if ('IntersectionObserver' in window){
+  const vis = new Set();
+  const io = new IntersectionObserver(es => { es.forEach(e => e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)); mcta.classList.toggle('hide', vis.size>0); });
+  io.observe(document.querySelector('.hero-cta')); io.observe(document.getElementById('apply'));
+}
+</script>
+</body>
+</html>
