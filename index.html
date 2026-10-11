@@ -382,6 +382,7 @@ footer .wrap{display:grid;gap:.5rem}
             </select></div>
         </div>
         <div class="field"><label for="pain">資料回収で一番困っていること<span class="opt">任意</span></label><textarea id="pain" name="pain" placeholder="例：締切を過ぎても出さない顧問先への催促が負担"></textarea></div>
+        <input type="text" id="hp" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <p class="consent">ご入力いただいた情報は、β版のご案内とヒアリングのご連絡にのみ使用します。</p>
         <button class="btn btn-primary" type="submit" id="submitBtn">この内容で応募する</button>
         <div class="result" id="result" hidden role="status" aria-live="polite"></div>
@@ -401,13 +402,14 @@ footer .wrap{display:grid;gap:.5rem}
 <div class="mcta" id="mcta"><a class="btn btn-primary" href="#apply">β版モニターに応募する（無料）</a></div>
 
 <script>
-/* 応募の送信先。Googleフォームの formResponse URL と各項目の entry ID を入れると、そのまま送信されます。
-   未設定の間は、応募内容とメールアドレスを表示してコピーしてもらう方式で動きます。 */
-const FORM_CONFIG = {
-  action: "", // PLACEHOLDER: 例 "https://docs.google.com/forms/d/e/XXXX/formResponse"
-  entries: { office:"entry.1", name:"entry.2", email:"entry.3", clients:"entry.4", method:"entry.5", pain:"entry.6" } // PLACEHOLDER
-};
+/* 応募の送信先。FormSubmit（https://formsubmit.co）経由で CONTACT 宛にメールで届きます。
+   初回の送信時だけ、CONTACT 宛に有効化の確認メールが届くので、そのリンクを押すと以降は自動で届きます。
+   送信に失敗したときは、応募内容をコピーしてメールで送ってもらう画面に切り替わります。 */
 const CONTACT = "yuuki.oda.work@gmail.com";
+const FORM_CONFIG = {
+  action: `https://formsubmit.co/ajax/${CONTACT}`,
+  entries: { office:"事務所名", name:"お名前", email:"メールアドレス", clients:"顧問先の数", method:"資料回収の方法", pain:"困っていること" }
+};
 
 const form = document.getElementById('applyForm');
 const result = document.getElementById('result');
@@ -436,9 +438,11 @@ form.addEventListener('submit', async (e) => {
   btn.disabled = true; btn.textContent = "送信しています…";
   if (FORM_CONFIG.action){
     try{
-      const fd = new FormData();
-      for (const [k,v] of Object.entries(d)) fd.append(FORM_CONFIG.entries[k], v);
-      await fetch(FORM_CONFIG.action, { method:"POST", mode:"no-cors", body:fd });
+      const body = { _subject:`【書類あつめ】β版モニター応募：${d.office}`, _template:"table", _replyto:d.email, _honey:document.getElementById('hp').value };
+      for (const [k,v] of Object.entries(d)) body[FORM_CONFIG.entries[k]] = v || "-";
+      const res = await fetch(FORM_CONFIG.action, { method:"POST", headers:{ "Content-Type":"application/json", "Accept":"application/json" }, body:JSON.stringify(body) });
+      const json = await res.json().catch(()=>({}));
+      if (!res.ok || String(json.success) !== "true") throw new Error(json.message || res.status);
       result.innerHTML = "<strong>応募を受け付けました。</strong><p>2営業日以内に、ご入力のメールアドレス宛にご案内をお送りします。</p>";
       result.hidden = false; form.querySelectorAll('input,select,textarea').forEach(el=>el.disabled=true);
       btn.hidden = true; return;
